@@ -23,9 +23,9 @@ class OpenCoverPlugin implements Plugin<Project> {
             def version = task.getOpenCoverVersion()
             downloadOpenCover(project, version)
         }
-        task.conventionMapping.map "targetAssemblies", {
-            if (project.plugins.hasPlugin('msbuild')) {
-                task.dependsOn project.tasks.msbuild
+        if (project.plugins.hasPlugin('msbuild')) {
+            task.dependsOn project.tasks.msbuild
+            task.conventionMapping.map "targetAssemblies", {
                 project.tasks.msbuild.projects.findAll { !(it.key =~ 'test') }.collect {
                     it.value.getProjectPropertyPath('TargetPath')
                 }

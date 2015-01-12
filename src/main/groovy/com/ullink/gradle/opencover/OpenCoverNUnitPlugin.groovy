@@ -14,6 +14,7 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
 
     def applyOpencoverNunitConventions(OpenCover task, Project project) {
         Task nunit = project.tasks.nunit
+        task.dependsOn nunit.dependsOn
         task.doFirst {
             nunit.prepareExecute()
         }
