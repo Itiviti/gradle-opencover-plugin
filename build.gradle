@@ -9,7 +9,7 @@ apply from: "${ext.ullinkGradleScripts}/task-rules.gradle"
 apply from: "${ext.ullinkGradleScripts}/functions.gradle"
 
 group = 'com.ullink.gradle'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 description 'gradle-opencover-plugin is a Gradle plugin for getting code coverage using OpenCover'
 sourceCompatibility = '1.6'
 

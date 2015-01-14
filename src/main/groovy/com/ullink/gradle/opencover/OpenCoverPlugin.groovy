@@ -26,7 +26,9 @@ class OpenCoverPlugin implements Plugin<Project> {
         if (project.plugins.hasPlugin('msbuild')) {
             task.dependsOn project.tasks.msbuild
             task.conventionMapping.map "targetAssemblies", {
-                project.tasks.msbuild.projects.findAll { !(it.key =~ 'test') }.collect {
+                project.tasks.msbuild.projects.findAll {
+                    !(it.key =~ 'test') && it.value.properties.TargetPath
+                }.collect {
                     it.value.getProjectPropertyPath('TargetPath')
                 }
             }
