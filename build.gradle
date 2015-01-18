@@ -11,13 +11,21 @@ apply from: "${ext.ullinkGradleScripts}/functions.gradle"
 group = 'com.ullink.gradle'
 version = '1.0'
 description 'gradle-opencover-plugin is a Gradle plugin for getting code coverage using OpenCover'
-sourceCompatibility = '1.6'
 
 dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'com.ullink.gradle:gradle-repositories-plugin:2.1'
     compile 'org.apache.commons:commons-io:1.3.2'
+}
+
+bintray {
+    // to remove when upgraded plugindev to 1.0.4
+    user project.properties.bintrayUser
+    key project.properties.bintrayApiKey
+    pkg.repo = 'gradle-plugins'
+    pkg.version.gpg.sign = true
+    pkg.userOrg = 'ullink'
 }
 
 plugindev {
