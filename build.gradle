@@ -1,16 +1,10 @@
-plugins {
-    id 'nu.studer.plugindev' version '1.0.3'
+buildscript {
+    dependencies {
+        classpath "nu.studer:gradle-plugindev-plugin:1.0.4.DEV"
+    }
 }
-
 apply plugin: 'groovy'
-
-ext.ullinkGradleScripts = 'https://raw.github.com/gluck/gradle-scripts/master'
-apply from: "${ext.ullinkGradleScripts}/task-rules.gradle"
-apply from: "${ext.ullinkGradleScripts}/functions.gradle"
-
-group = 'com.ullink.gradle'
-version = '1.0'
-description 'gradle-opencover-plugin is a Gradle plugin for getting code coverage using OpenCover'
+apply plugin: 'nu.studer.plugindev'
 
 dependencies {
     compile gradleApi()
@@ -18,6 +12,11 @@ dependencies {
     compile 'com.ullink.gradle:gradle-repositories-plugin:2.1'
     compile 'org.apache.commons:commons-io:1.3.2'
 }
+
+group = 'com.ullink.gradle'
+version = '1.0'
+description 'gradle-opencover-plugin is a Gradle plugin for getting code coverage using OpenCover'
+
 
 bintray {
     // to remove when upgraded plugindev to 1.0.4
@@ -29,9 +28,7 @@ bintray {
 }
 
 plugindev {
-    pluginId 'com.ullink.opencover'
     pluginName 'com.ullink.gradle:gradle-opencover-plugin'
-    pluginImplementationClass 'com.ullink.gradle.opencover.OpenCoverPlugin'
     pluginDescription project.description
     pluginLicenses 'Apache-2.0'
     pluginTags 'gradle', 'plugin', 'opencover', 'c#', '.net', 'test'
@@ -40,5 +37,15 @@ plugindev {
     authorEmail 'muryoh@gmail.com'
     projectUrl "https://github.com/muryoh/${project.name}"
     projectInceptionYear '2015'
+
+    pluginImplementation {
+        pluginId 'com.ullink.opencover'
+        pluginImplementationClass 'com.ullink.gradle.opencover.OpenCoverPlugin'
+    }
+    pluginImplementation {
+        pluginId = 'com.ullink.opencover-nunit'
+        pluginImplementationClass 'com.ullink.gradle.opencover.OpenCoverNUnitPlugin'
+    }
+
     done()
 }

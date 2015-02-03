@@ -5,7 +5,7 @@ A gradle plugin for getting test coverage using OpenCover
 
 # opencover plugin
 
-A base plugin 'opencover' is provided. It will sets up a task named 'opencover' that when called will execute
+A base plugin 'com.ullink.opencover' is provided. It will sets up a task named 'opencover' that when called will execute
 the OpenCover.exe file of the associated OpenCover version. That task may be configured:
 
     opencover {
@@ -30,7 +30,7 @@ the OpenCover.exe file of the associated OpenCover version. That task may be con
 
 #opencover-nunit plugin
 
-An NUnit ready plugin is also provided: 'opencover-nunit'. It relies on the gradle-nunit-plugin 'nunit' task to
+An NUnit ready plugin is also provided: 'com.ullink.opencover-nunit'. It relies on the gradle-nunit-plugin 'nunit' task to
 configure the 'opencover' task. Using it, provided the default values suit you, the only setup you'll need is
 
     opencover {
