@@ -9,7 +9,7 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
         project.tasks.withType(OpenCover).whenTaskAdded { OpenCover task ->
             applyOpencoverNunitConventions(task, project)
         }
-        project.apply plugin: 'opencover'
+        project.apply plugin: 'com.ullink.opencover'
     }
 
     def applyOpencoverNunitConventions(OpenCover task, Project project) {
