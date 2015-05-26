@@ -1,4 +1,4 @@
-gradle-opencover-plugin
+gradle-opencover-plugin [![Build status](https://ci.appveyor.com/api/projects/status/chcaikhiapb4mmn2?svg=true)](https://ci.appveyor.com/project/gluck/gradle-opencover-plugin) [![Build Status](https://travis-ci.org/Ullink/gradle-opencover-plugin.svg?branch=master)](https://travis-ci.org/Ullink/gradle-opencover-plugin)
 =======================
 
 A gradle plugin for getting test coverage using OpenCover
