@@ -36,3 +36,7 @@ configure the 'opencover' task. Using it, provided the default values suit you, 
     opencover {
         targetAssemblies = ...
     }
+
+# License
+
+All these plugins are licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) with no warranty (expressed or implied) for any purpose.
