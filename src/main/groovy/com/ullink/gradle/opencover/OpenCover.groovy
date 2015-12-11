@@ -11,11 +11,11 @@ class OpenCover extends ConventionTask {
     def openCoverVersion
     def targetExec
     def targetExecArgs
-    def targetDir
     List targetAssemblies
 
     boolean returnTargetCode = true
     boolean ignoreFailures = false
+    boolean mergeOutput = false
 
     OpenCover() {
         inputs.files {
@@ -65,8 +65,8 @@ class OpenCover extends ConventionTask {
 
     def buildCommandLine() {
         def commandLineArgs = [openCoverConsole, '-register:user', '-mergebyhash']
-        if (returnTargetCode)
-            commandLineArgs += '-returntargetcode'
+        if (returnTargetCode) commandLineArgs += '-returntargetcode'
+        if (mergeOutput) commandLineArgs += '-mergeoutput'
         commandLineArgs += ["-target:${getTargetExec()}", "-targetargs:${getTargetExecArgs().join(' ')}", "-targetdir:${project.buildDir}"]
         getTargetAssemblies().each {
             commandLineArgs += "+[${FilenameUtils.getBaseName(project.file(it).name)}]"

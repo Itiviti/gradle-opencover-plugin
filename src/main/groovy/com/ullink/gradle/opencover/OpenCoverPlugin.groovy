@@ -15,7 +15,7 @@ class OpenCoverPlugin implements Plugin<Project> {
     }
 
     def applyOpencoverConventions(OpenCover task, Project project) {
-        task.conventionMapping.map "openCoverVersion", { '4.5.1604' }
+        task.conventionMapping.map "openCoverVersion", { '4.6.166' }
         task.conventionMapping.map "openCoverHome", {
             if (System.getenv()['OPENCOVER_HOME']) {
                 return System.getenv()['OPENCOVER_HOME']
@@ -44,7 +44,7 @@ class OpenCoverPlugin implements Plugin<Project> {
         if (!ret.exists()) {
             project.logger.info "Downloading & Unpacking OpenCover ${version}"
             def tmpFile = File.createTempFile("opencover.zip", null)
-            new URL("https://bitbucket.org/shaunwilde/opencover/downloads/opencover.${version}.zip").withInputStream { i ->
+            new URL(getUrlForVersion(version)).withInputStream { i ->
                 tmpFile.withOutputStream {
                     it << i
                 }
@@ -52,5 +52,12 @@ class OpenCoverPlugin implements Plugin<Project> {
             project.ant.unzip(src: tmpFile, dest: ret)
         }
         ret
+    }
+
+    def getUrlForVersion(def version) {
+        if (version <= '4.5.3207') {
+            return "https://bitbucket.org/shaunwilde/opencover/downloads/opencover.${version}.zip"
+        }
+        return "https://github.com/OpenCover/opencover/releases/download/${version}/opencover.${version}.zip"
     }
 }
