@@ -1,20 +1,22 @@
 buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://dl.bintray.com/ullink/gradle-plugins"
+        }
+    }
     dependencies {
-        classpath "nu.studer:gradle-plugindev-plugin:1.0.4.DEV"
+        classpath "nu.studer:gradle-plugindev-plugin:1.0.4.MULTI"
     }
 }
 apply plugin: 'groovy'
 apply plugin: 'nu.studer.plugindev'
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile 'com.ullink.gradle:gradle-repositories-plugin:2.1'
     compile 'org.apache.commons:commons-io:1.3.2'
 }
 
 group = 'com.ullink.gradle'
-version = '1.2-SNAPSHOT'
 description 'gradle-opencover-plugin is a Gradle plugin for getting code coverage using OpenCover'
 
 
@@ -35,7 +37,7 @@ plugindev {
     authorId 'muryoh'
     authorName 'Remy Masson'
     authorEmail 'muryoh@gmail.com'
-    projectUrl "https://github.com/muryoh/${project.name}"
+    projectUrl "https://github.com/Ullink/${project.name}"
     projectInceptionYear '2015'
 
     pluginImplementation {
