@@ -1,6 +1,12 @@
 buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://dl.bintray.com/ullink/gradle-plugins"
+        }
+    }
     dependencies {
-        classpath "nu.studer:gradle-plugindev-plugin:1.0.4.DEV"
+        classpath "nu.studer:gradle-plugindev-plugin:1.0.4.MULTI"
     }
 }
 apply plugin: 'groovy'
