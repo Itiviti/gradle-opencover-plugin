@@ -1,4 +1,4 @@
-gradle-opencover-plugin [![Build status](https://ci.appveyor.com/api/projects/status/chcaikhiapb4mmn2?svg=true)](https://ci.appveyor.com/project/gluck/gradle-opencover-plugin) [![Build Status](https://travis-ci.org/Ullink/gradle-opencover-plugin.svg?branch=master)](https://travis-ci.org/Ullink/gradle-opencover-plugin)
+gradle-opencover-plugin [![Build status](https://ci.appveyor.com/api/projects/status/chcaikhiapb4mmn2?svg=true)](https://ci.appveyor.com/project/gluck/gradle-opencover-plugin) [![Build Status](https://travis-ci.org/Ullink/gradle-opencover-plugin.svg?branch=master)](https://travis-ci.org/Ullink/gradle-opencover-plugin) [![GitHub license](https://img.shields.io/github/license/Ullink/gradle-opencover-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 =======================
 
 A gradle plugin for getting test coverage using OpenCover
@@ -18,8 +18,6 @@ the OpenCover.exe file of the associated OpenCover version. That task may be con
         targetExec
         // mandatory - specifies the test runner arguments (associated 'nunit-console.exe' parameters)
         targetExecArgs
-        // optional - targetdir specified to OpenCover for the test runner executable
-        targetDir
         // mandatory - assemblies to obtain test coverage for
         targetAssemblies
         // optional - defaults to TRUE. OpenCover will return the return code of the test runner executable.
