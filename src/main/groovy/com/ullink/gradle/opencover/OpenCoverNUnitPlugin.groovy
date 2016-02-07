@@ -18,7 +18,7 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
             nunit.prepareExecute()
         }
         task.conventionMapping.map 'targetExec', { nunit.nunitExec }
-        task.conventionMapping.map 'targetExecArgs', { nunit.buildCommandArgs() }
+        task.conventionMapping.map 'targetExecArgs', { nunit.commandArgs }
         project.afterEvaluate {
             task.dependsOn nunit.dependsOn
             task.inputsOutputsFrom(nunit)
