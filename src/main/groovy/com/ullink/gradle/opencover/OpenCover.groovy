@@ -67,11 +67,21 @@ class OpenCover extends ConventionTask {
         def commandLineArgs = [openCoverConsole, '-register:user', '-mergebyhash']
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
         if (mergeOutput) commandLineArgs += '-mergeoutput'
-        commandLineArgs += ["-target:${getTargetExec()}", "-targetargs:${getTargetExecArgs().join(' ')}", "-targetdir:${project.buildDir}"]
+        commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
         getTargetAssemblies().each {
             commandLineArgs += "+[${FilenameUtils.getBaseName(project.file(it).name)}]"
         }
         commandLineArgs += "-output:${getCoverageReportPath()}"
+    }
+
+    def escapeArg(arg) {
+        arg = arg.toString()
+        if (arg.startsWith('"') && arg.endsWith('"'))
+            arg = arg.substring(1, arg.length()-1)
+        if (!arg.contains(' ')) return arg
+        if (arg.contains('"'))
+            throw new IllegalArgumentException("Don't know how to deal with this argument: ${arg}")
+        return '\\"'+arg+'\\"';
     }
 
     def execute(commandLineArgs) {
