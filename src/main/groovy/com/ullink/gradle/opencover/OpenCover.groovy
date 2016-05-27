@@ -67,10 +67,10 @@ class OpenCover extends ConventionTask {
         def commandLineArgs = [openCoverConsole, '-register:user', '-mergebyhash']
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
         if (mergeOutput) commandLineArgs += '-mergeoutput'
+
         commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
-        getTargetAssemblies().each {
-            commandLineArgs += "+[${FilenameUtils.getBaseName(project.file(it).name)}]"
-        }
+        def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
+        commandLineArgs += '-filter:"' + filters.join(' ') + '"'
         commandLineArgs += "-output:${getCoverageReportPath()}"
     }
 
