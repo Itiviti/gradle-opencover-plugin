@@ -1,5 +1,10 @@
 # gradle-opencover-plugin changelog
 
+
+## 1.4
+### Fixed
+* Filtering is handled properly. It was basically ignored.
+
 ## 1.3
 ### Fixed
 * Fix breaking change for gradle-nunit-plugin introduced in 1.5
