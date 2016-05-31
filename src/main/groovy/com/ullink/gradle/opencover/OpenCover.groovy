@@ -70,7 +70,7 @@ class OpenCover extends ConventionTask {
 
         commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
         def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
-        commandLineArgs += '-filter:"' + filters.join(' ') + '"'
+        commandLineArgs += '"-filter:' + filters.join(' ') + '"'
         commandLineArgs += "-output:${getCoverageReportPath()}"
     }
 
