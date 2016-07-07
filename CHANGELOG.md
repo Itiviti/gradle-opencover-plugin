@@ -1,5 +1,9 @@
 # gradle-opencover-plugin changelog
 
+## 1.5
+### Added
+* OpenCover register mode can be set via the `registerMode` parameter according to opencover's [usage](https://github.com/OpenCover/opencover/wiki/Usage). Can be (set to) `null` to disable the parameter
+
 ## 1.4
 ### Fixed
 * The proper assembly names are sent to opencover as filters, yielding
