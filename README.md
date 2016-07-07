@@ -24,6 +24,8 @@ the OpenCover.exe file of the associated OpenCover version. That task may be con
         returnTargetCode
         // optional - defaults to FALSE. Determines the behavior of the task if OpenCover's return code is abnormal
         ignoreFailures
+        // optional - defaults to user. Specifies opencover's profile register mode (user, path32, path64, null). More details in https://github.com/OpenCover/opencover/wiki/Usage
+        registerMode
     }
 
 #opencover-nunit plugin

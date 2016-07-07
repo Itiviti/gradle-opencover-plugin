@@ -11,6 +11,7 @@ class OpenCover extends ConventionTask {
     def openCoverVersion
     def targetExec
     def targetExecArgs
+    def registerMode
     List targetAssemblies
 
     boolean returnTargetCode = true
@@ -18,6 +19,8 @@ class OpenCover extends ConventionTask {
     boolean mergeOutput = false
 
     OpenCover() {
+        conventionMapping.map 'registerMode', { 'user' }
+
         inputs.files {
             getTargetAssemblies()
         }
@@ -64,7 +67,8 @@ class OpenCover extends ConventionTask {
     }
 
     def buildCommandLine() {
-        def commandLineArgs = [openCoverConsole, '-register:user', '-mergebyhash']
+        def commandLineArgs = [openCoverConsole, '-mergebyhash']
+        if (getRegisterMode()) commandLineArgs += '-register:' + getRegisterMode()
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
         if (mergeOutput) commandLineArgs += '-mergeoutput'
 
