@@ -1,5 +1,9 @@
 # gradle-opencover-plugin changelog
 
+## 1.6
+### Fixed
+* Do not use relocated artifact for commons-io
+
 ## 1.5
 ### Added
 * OpenCover register mode can be set via the `registerMode` parameter according to opencover's [usage](https://github.com/OpenCover/opencover/wiki/Usage). Can be (set to) `null` to disable the parameter
