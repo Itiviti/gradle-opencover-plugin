@@ -1,5 +1,8 @@
 # gradle-opencover-plugin changelog
 
+## 1.7
+
+
 ## 1.6
 ### Fixed
 * Do not use relocated artifact for commons-io
