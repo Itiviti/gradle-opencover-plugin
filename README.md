@@ -9,7 +9,7 @@ A base plugin 'com.ullink.opencover' is provided. It will sets up a task named '
 the OpenCover.exe file of the associated OpenCover version. That task may be configured:
 
     opencover {
-        // optional - defaults to '4.6.166'
+        // optional - defaults to '4.6.519'
         openCoverVersion
         // optional - defaults to OPENCOVER_HOME env variable if set or to a downloaded opencover home corresponding to
         // the specified openCoverVersion

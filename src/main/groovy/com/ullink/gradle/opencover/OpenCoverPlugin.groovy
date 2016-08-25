@@ -15,7 +15,7 @@ class OpenCoverPlugin implements Plugin<Project> {
     }
 
     def applyOpencoverConventions(OpenCover task, Project project) {
-        task.conventionMapping.map "openCoverVersion", { '4.6.166' }
+        task.conventionMapping.map "openCoverVersion", { '4.6.519' }
         task.conventionMapping.map "openCoverHome", {
             if (System.getenv()['OPENCOVER_HOME']) {
                 return System.getenv()['OPENCOVER_HOME']
