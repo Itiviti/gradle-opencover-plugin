@@ -2,6 +2,11 @@
 
 ## 1.7
 
+### Updated
+* OpenCover version to 4.6.519
+
+### Fixed
+* Escape double quotes in filters
 
 ## 1.6
 ### Fixed
