@@ -13,10 +13,14 @@ class OpenCover extends ConventionTask {
     def targetExecArgs
     def registerMode
     List targetAssemblies
+    def excludeByFile
+    def excludeByAttribute
+    def hideSkipped
 
     boolean returnTargetCode = true
     boolean ignoreFailures = false
     boolean mergeOutput = false
+    boolean skipAutoProps = false
 
     OpenCover() {
         conventionMapping.map 'registerMode', { 'user' }
@@ -71,6 +75,10 @@ class OpenCover extends ConventionTask {
         if (getRegisterMode()) commandLineArgs += '-register:' + getRegisterMode()
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
         if (mergeOutput) commandLineArgs += '-mergeoutput'
+        if (excludeByFile) commandLineArgs += '-excludebyfile:' + excludeByFile
+        if (excludeByAttribute) commandLineArgs += '-excludebyattribute:' + excludeByAttribute
+        if (skipAutoProps) commandLineArgs += '-skipautoprops'
+        if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
 
         commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
         def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
