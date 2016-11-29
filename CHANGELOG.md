@@ -8,6 +8,10 @@
 ### Fixed
 * Escape double quotes in filters
 
+### Added
+* Exclusion parameters for OpenCover (excludebyfile, excludebyattribute, skipautoprops, hideskipped and skipautoprops)
+[usage](https://github.com/OpenCover/opencover/wiki/Usage)
+
 ## 1.6
 ### Fixed
 * Do not use relocated artifact for commons-io

@@ -26,6 +26,17 @@ the OpenCover.exe file of the associated OpenCover version. That task may be con
         ignoreFailures
         // optional - defaults to user. Specifies opencover's profile register mode (user, path32, path64, null). More details in https://github.com/OpenCover/opencover/wiki/Usage
         registerMode
+        // optional - Exclude a class (or methods) by filter(s) that match the filenames
+        // More details in https://github.com/OpenCover/opencover/wiki/Usage
+        excludeByFile
+        // optional - Exclude a class or method by filter(s) that match attributes that have been applied.
+        // More details in https://github.com/OpenCover/opencover/wiki/Usage
+        excludeByAttribute
+        // optional - defaults to FALSE. Neither track nor record auto-implemented properties.
+        skipAutoProps
+        // optional - Remove information from output file that relates to classes/modules that have been skipped.
+        // Possible values: File;Filter;Attribute;MissingPdb;All
+        hideSkipped
     }
 
 #opencover-nunit plugin
