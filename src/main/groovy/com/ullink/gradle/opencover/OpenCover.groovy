@@ -55,8 +55,7 @@ class OpenCover extends ConventionTask {
         openCoverExec
     }
 
-    def getReportGeneratorConsole()
-    {
+    def getReportGeneratorConsole() {
         def reportGenerator = 'reportgenerator-'+ reportGeneratorVersion
         Path path = Paths.get(project.gradle.gradleUserHomeDir.toString(), 'caches', 'reportgenerator', reportGenerator)
         File reportGeneratorExec = new File(path.toString(), "ReportGenerator.exe")
@@ -87,18 +86,15 @@ class OpenCover extends ConventionTask {
     def runOpenCover() {
         def commandLineArgs = getCommonOpenCoverArgs()
 
-        if (!shouldRunInParallel())
-        {
+        if (!shouldRunInParallel()) {
             runSingleOpenCover(commandLineArgs)
         }
-        else
-        {
+        else {
             runMultipleOpenCovers(commandLineArgs)
         }
     }
 
-    def getCommonOpenCoverArgs()
-    {
+    def getCommonOpenCoverArgs() {
         def commandLineArgs = [openCoverConsole, '-mergebyhash']
         if (getRegisterMode()) commandLineArgs += '-register:' + getRegisterMode()
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
@@ -111,8 +107,7 @@ class OpenCover extends ConventionTask {
         commandLineArgs
     }
 
-    def runSingleOpenCover(ArrayList commandLineArgs)
-    {
+    def runSingleOpenCover(ArrayList commandLineArgs) {
         commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
         def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
         commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
@@ -121,12 +116,11 @@ class OpenCover extends ConventionTask {
         execute(commandLineArgs)
     }
 
-    def runMultipleOpenCovers(ArrayList commandLineArgs)
-    {
+    def runMultipleOpenCovers(ArrayList commandLineArgs) {
         def intermediateReportsPath = new File(reportsFolder, "intermediate-results-" + name)
         intermediateReportsPath.mkdirs()
 
-        def runs = getTestInputAsList(getWhereFilters())
+        def runs = project.nunit.getTestInputAsList(getWhereFilters())
 
         GParsPool.withPool {
             runs.eachParallel {
@@ -151,37 +145,15 @@ class OpenCover extends ConventionTask {
           UUID.randomUUID().toString()
       }
 
-    List<String> getTestInputAsList(def testInput) {
-         if (!testInput) {
-             return []
-         }
-
-         if (testInput instanceof List) {
-             return testInput
-         }
-        
-         if (isACommaSeparatedList(testInput)) {
-             return testInput.tokenize(',')
-         }
-
-         return [testInput]
-     }
-
-    Boolean isACommaSeparatedList(def input) {
-        return input != null && input.contains(',');
-    }
-
     def shouldRunInParallel() {
         if (!project.nunit.parallelForks || getWhereFilters() == null)
             return false
         return true
     }
 
-    def getWhereFilters()
-    {
+    def getWhereFilters() {
         def nunit = project.nunit
-        if (nunit.hasProperty('where'))
-        {
+        if (nunit.hasProperty('where')) {
             def whereCondition = nunit.where
             if (whereCondition != null)
                 return whereCondition.value
@@ -199,7 +171,7 @@ class OpenCover extends ConventionTask {
         if (!arg.contains(' ')) return arg
         if (arg.contains('"'))
             throw new IllegalArgumentException("Don't know how to deal with this argument: ${arg}")
-        return '\\"'+arg+'\\"';
+        return '\\"'+arg+'\\"'
     }
 
     def execute(commandLineArgs) {
@@ -213,8 +185,7 @@ class OpenCover extends ConventionTask {
         }
     }
 
-    def getMergeCommand(File intermediateReportsPath)
-    {
+    def getMergeCommand(File intermediateReportsPath) {
         def mergeCommand = [getReportGeneratorConsole()]
         mergeCommand += "\"-reports:${intermediateReportsPath}\\*.xml\""
         mergeCommand += "\"-targetdir: ${reportsFolder}\""
