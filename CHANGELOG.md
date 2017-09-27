@@ -9,6 +9,7 @@
 * Escape double quotes in filters
 
 ### Added
+* Possibility to start several OpenCovers at once
 * Exclusion parameters for OpenCover (excludebyfile, excludebyattribute, skipautoprops, hideskipped and skipautoprops)
 [usage](https://github.com/OpenCover/opencover/wiki/Usage)
 
