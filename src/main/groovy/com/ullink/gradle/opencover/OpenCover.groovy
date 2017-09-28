@@ -4,7 +4,11 @@ import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.internal.ConventionTask
+import groovyx.gpars.GParsPool
 import org.gradle.api.tasks.TaskAction
+
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class OpenCover extends ConventionTask {
     def openCoverHome
@@ -16,6 +20,8 @@ class OpenCover extends ConventionTask {
     def excludeByFile
     def excludeByAttribute
     def hideSkipped
+    def reportGeneratorVersion
+    def assemblyFilters
 
     boolean returnTargetCode = true
     boolean ignoreFailures = false
@@ -49,6 +55,14 @@ class OpenCover extends ConventionTask {
         openCoverExec
     }
 
+    def getReportGeneratorConsole() {
+        def reportGenerator = 'reportgenerator-'+ reportGeneratorVersion
+        Path path = Paths.get(project.gradle.gradleUserHomeDir.toString(), 'caches', 'reportgenerator', reportGenerator)
+        File reportGeneratorExec = new File(path.toString(), "ReportGenerator.exe")
+
+        reportGeneratorExec
+    }
+
     def getOutputFolder() {
         new File(project.buildDir, 'opencover')
     }
@@ -62,15 +76,25 @@ class OpenCover extends ConventionTask {
     }
 
     @TaskAction
+
     def build() {
         reportsFolder.mkdirs()
 
-        def commandLine = buildCommandLine()
-
-        execute(commandLine)
+        runOpenCover()
     }
 
-    def buildCommandLine() {
+    def runOpenCover() {
+        def commandLineArgs = getCommonOpenCoverArgs()
+
+        if (!shouldRunInParallel()) {
+            runSingleOpenCover(commandLineArgs)
+        }
+        else {
+            runMultipleOpenCovers(commandLineArgs)
+        }
+    }
+
+    def getCommonOpenCoverArgs() {
         def commandLineArgs = [openCoverConsole, '-mergebyhash']
         if (getRegisterMode()) commandLineArgs += '-register:' + getRegisterMode()
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
@@ -80,10 +104,64 @@ class OpenCover extends ConventionTask {
         if (skipAutoProps) commandLineArgs += '-skipautoprops'
         if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
 
+        commandLineArgs
+    }
+
+    def runSingleOpenCover(ArrayList commandLineArgs) {
         commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
         def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
         commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
         commandLineArgs += "-output:${getCoverageReportPath()}"
+
+        execute(commandLineArgs)
+    }
+
+    def runMultipleOpenCovers(ArrayList commandLineArgs) {
+        def intermediateReportsPath = new File(reportsFolder, "intermediate-results-" + name)
+        intermediateReportsPath.mkdirs()
+
+        def runs = project.nunit.getTestInputAsList(getWhereFilters())
+
+        GParsPool.withPool {
+            runs.eachParallel {
+                def fileName = getRandomFileName()
+                logger.info("Filename generated for the \'$it\' input was \'$fileName\'")
+
+                def execArgs = project.nunit.buildCommandArgs(it, new File(intermediateReportsPath, fileName + ".xml"))
+                commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${execArgs.collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
+                commandLineArgs += "-output:${new File(intermediateReportsPath, fileName + ".xml")}"
+
+                execute(commandLineArgs)
+            }
+        }
+
+        execute(getMergeCommand(intermediateReportsPath))
+
+        new File(reportsFolder, "Summary.xml").renameTo(new File(reportsFolder, "coverage.xml"))
+        new File(intermediateReportsPath, "").deleteDir()
+    }
+
+    def getRandomFileName() {
+          UUID.randomUUID().toString()
+      }
+
+    def shouldRunInParallel() {
+        if (!project.nunit.parallelForks || getWhereFilters() == null)
+            return false
+        return true
+    }
+
+    def getWhereFilters() {
+        def nunit = project.nunit
+        if (nunit.hasProperty('where')) {
+            def whereCondition = nunit.where
+            if (whereCondition != null)
+                return whereCondition.value
+            else
+                return null
+        }
+        else
+            return null
     }
 
     def escapeArg(arg) {
@@ -93,7 +171,7 @@ class OpenCover extends ConventionTask {
         if (!arg.contains(' ')) return arg
         if (arg.contains('"'))
             throw new IllegalArgumentException("Don't know how to deal with this argument: ${arg}")
-        return '\\"'+arg+'\\"';
+        return '\\"'+arg+'\\"'
     }
 
     def execute(commandLineArgs) {
@@ -105,5 +183,15 @@ class OpenCover extends ConventionTask {
         if (!ignoreFailures && mbr.exitValue < 0) {
             throw new GradleException("${openCoverConsole} execution failed (ret=${mbr.exitValue})");
         }
+    }
+
+    def getMergeCommand(File intermediateReportsPath) {
+        def mergeCommand = [getReportGeneratorConsole()]
+        mergeCommand += "\"-reports:${intermediateReportsPath}\\*.xml\""
+        mergeCommand += "\"-targetdir: ${reportsFolder}\""
+        mergeCommand += "-assemblyfilters:+${getAssemblyFilters()}"
+        mergeCommand += "-reporttypes:xmlSummary"
+
+        mergeCommand
     }
 }
