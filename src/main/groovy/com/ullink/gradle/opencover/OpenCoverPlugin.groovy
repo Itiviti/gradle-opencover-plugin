@@ -25,7 +25,7 @@ class OpenCoverPlugin implements Plugin<Project> {
         }
 
         task.conventionMapping.map 'reportGeneratorVersion', {'2.5.11.0'}
-        if (task.shouldRunInParallel()) {
+        if (task.parallelForks) {
             downloadReportGenerator(project, task.getReportGeneratorVersion())
         }
 
@@ -51,7 +51,7 @@ class OpenCoverPlugin implements Plugin<Project> {
         if (!ret.exists()) {
             project.logger.info "Downloading & Unpacking OpenCover ${version}"
             def tmpFile = File.createTempFile("opencover.zip", null)
-            new URL(getUrlForVersion(version)).withInputStream { i ->
+            new URL(getOpenCoverUrl(version)).withInputStream { i ->
                 tmpFile.withOutputStream {
                     it << i
                 }
@@ -74,7 +74,7 @@ class OpenCoverPlugin implements Plugin<Project> {
 
             def tmpFile = File.createTempFile("reportgenerator.zip", null)
 
-            new URL(getReportGeneratorUrlForVersion(version)).withInputStream { i ->
+            new URL(getReportGeneratorUrl(version)).withInputStream { i ->
                 tmpFile.withOutputStream {
                     it << i
                 }
@@ -84,14 +84,14 @@ class OpenCoverPlugin implements Plugin<Project> {
         ret
     }
 
-    def getUrlForVersion(def version) {
+    def getOpenCoverUrl(def version) {
         if (version <= '4.5.3207') {
             return "https://bitbucket.org/shaunwilde/opencover/downloads/opencover.${version}.zip"
         }
         return "https://github.com/OpenCover/opencover/releases/download/${version}/opencover.${version}.zip"
     }
 
-    def getReportGeneratorUrlForVersion(def version)
+    def getReportGeneratorUrl(def version)
     {
         return "https://github.com/danielpalme/ReportGenerator/releases/download/v${version}/ReportGenerator_${version}.zip"
     }

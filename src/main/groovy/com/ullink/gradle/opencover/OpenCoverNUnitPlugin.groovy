@@ -17,8 +17,14 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
         task.doFirst {
             nunit.prepareExecute()
         }
+
         task.conventionMapping.map 'targetExec', { nunit.nunitExec }
         task.conventionMapping.map 'targetExecArgs', { nunit.commandArgs }
+        task.conventionMapping.map 'parallelForks',{ nunit.parallelForks }
+        task.conventionMapping.map 'parallelTargetExecArgs', {
+            nunit.getTestInputAsList(nunit.where?.value).collect({nunit.buildCommandArgs(it,  new File(nunit.getReportFolderImpl(), "intermediate-results-nunit").mkdirs())})
+        }
+
         project.afterEvaluate {
             task.dependsOn nunit.dependsOn
             task.inputsOutputsFrom(nunit)

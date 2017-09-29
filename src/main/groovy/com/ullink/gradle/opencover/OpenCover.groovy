@@ -7,7 +7,6 @@ import org.gradle.api.internal.ConventionTask
 import groovyx.gpars.GParsPool
 import org.gradle.api.tasks.TaskAction
 
-import java.nio.file.Path
 import java.nio.file.Paths
 
 class OpenCover extends ConventionTask {
@@ -15,6 +14,8 @@ class OpenCover extends ConventionTask {
     def openCoverVersion
     def targetExec
     def targetExecArgs
+    def parallelForks
+    def parallelTargetExecArgs
     def registerMode
     List targetAssemblies
     def excludeByFile
@@ -56,11 +57,14 @@ class OpenCover extends ConventionTask {
     }
 
     def getReportGeneratorConsole() {
-        def reportGenerator = 'reportgenerator-'+ reportGeneratorVersion
-        Path path = Paths.get(project.gradle.gradleUserHomeDir.toString(), 'caches', 'reportgenerator', reportGenerator)
-        File reportGeneratorExec = new File(path.toString(), "ReportGenerator.exe")
-
+        assert getReportGeneratorHome(), "You must install ReportGenerator to merge intermediate results"
+        File reportGeneratorExec = new File(getReportGeneratorHome().toString(), "ReportGenerator.exe")
         reportGeneratorExec
+    }
+
+    def getReportGeneratorHome() {
+        def reportGenerator = 'reportgenerator-' + reportGeneratorVersion
+        Paths.get(project.gradle.gradleUserHomeDir.toString(), 'caches', 'reportgenerator', reportGenerator)
     }
 
     def getOutputFolder() {
@@ -86,7 +90,8 @@ class OpenCover extends ConventionTask {
     def runOpenCover() {
         def commandLineArgs = getCommonOpenCoverArgs()
 
-        if (!shouldRunInParallel()) {
+
+        if (!getParallelForks() || getParallelTargetExecArgs().size() == 0) {
             runSingleOpenCover(commandLineArgs)
         }
         else {
@@ -104,11 +109,14 @@ class OpenCover extends ConventionTask {
         if (skipAutoProps) commandLineArgs += '-skipautoprops'
         if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
 
+        commandLineArgs += "-target:${getTargetExec()}"
+        commandLineArgs += "-targetdir:${project.buildDir}"
+
         commandLineArgs
     }
 
     def runSingleOpenCover(ArrayList commandLineArgs) {
-        commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
+        commandLineArgs += ["\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\""]
         def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
         commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
         commandLineArgs += "-output:${getCoverageReportPath()}"
@@ -120,15 +128,12 @@ class OpenCover extends ConventionTask {
         def intermediateReportsPath = new File(reportsFolder, "intermediate-results-" + name)
         intermediateReportsPath.mkdirs()
 
-        def runs = project.nunit.getTestInputAsList(getWhereFilters())
-
         GParsPool.withPool {
-            runs.eachParallel {
+            getParallelTargetExecArgs().eachParallel {
                 def fileName = getRandomFileName()
-                logger.info("Filename generated for the \'$it\' input was \'$fileName\'")
+                logger.info("Filename generated for the ${it} input was ${fileName}")
 
-                def execArgs = project.nunit.buildCommandArgs(it, new File(intermediateReportsPath, fileName + ".xml"))
-                commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${execArgs.collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
+                commandLineArgs += ["\"-targetargs:${it.collect({escapeArg(it)}).join(' ')}\""]
                 commandLineArgs += "-output:${new File(intermediateReportsPath, fileName + ".xml")}"
 
                 execute(commandLineArgs)
@@ -142,26 +147,7 @@ class OpenCover extends ConventionTask {
     }
 
     def getRandomFileName() {
-          UUID.randomUUID().toString()
-      }
-
-    def shouldRunInParallel() {
-        if (!project.nunit.parallelForks || getWhereFilters() == null)
-            return false
-        return true
-    }
-
-    def getWhereFilters() {
-        def nunit = project.nunit
-        if (nunit.hasProperty('where')) {
-            def whereCondition = nunit.where
-            if (whereCondition != null)
-                return whereCondition.value
-            else
-                return null
-        }
-        else
-            return null
+        UUID.randomUUID().toString()
     }
 
     def escapeArg(arg) {
