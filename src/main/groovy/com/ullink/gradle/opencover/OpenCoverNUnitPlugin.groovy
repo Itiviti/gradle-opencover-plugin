@@ -24,9 +24,10 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
 
         def intermediateNunitResultsPath = new File(nunit.getReportFolderImpl().toString() , "intemediate-results-nunit")
 
-        task.conventionMapping.map 'intermediateNunitResultsPath', { intermediateNunitResultsPath}
         task.conventionMapping.map 'parallelTargetExecArgs', {
-            nunit.getTestInputAsList(nunit.where?.value).collect({nunit.buildCommandArgs(it,  new File (intermediateNunitResultsPath,  UUID.randomUUID().toString() + ".xml"))})}
+            intermediateNunitResultsPath.mkdirs()
+            nunit.getTestInputAsList(nunit.where?.value).collect({nunit.buildCommandArgs(it,  new File (intermediateNunitResultsPath,  UUID.randomUUID().toString() + ".xml"))})
+        }
 
         project.afterEvaluate {
             task.dependsOn nunit.dependsOn

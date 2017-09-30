@@ -16,7 +16,6 @@ class OpenCover extends ConventionTask {
     def targetExecArgs
     def parallelForks
     def parallelTargetExecArgs
-    def intermediateNunitResultsPath
     def registerMode
     List targetAssemblies
     def excludeByFile
@@ -109,6 +108,9 @@ class OpenCover extends ConventionTask {
         if (skipAutoProps) commandLineArgs += '-skipautoprops'
         if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
 
+        def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
+        commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
+
         commandLineArgs += "-target:${getTargetExec()}"
         commandLineArgs += "-targetdir:${project.buildDir}"
 
@@ -117,8 +119,6 @@ class OpenCover extends ConventionTask {
 
     def runSingleOpenCover(ArrayList commandLineArgs) {
         commandLineArgs += ["\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\""]
-        def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
-        commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
         commandLineArgs += "-output:${getCoverageReportPath()}"
 
         execute(commandLineArgs)
@@ -127,9 +127,6 @@ class OpenCover extends ConventionTask {
     def runMultipleOpenCovers(ArrayList commandLineArgs) {
         def intermediateReportsPath = new File(reportsFolder, "intermediate-results-" + name)
         intermediateReportsPath.mkdirs()
-
-        def nunitIntermediateFilesPath = new File(getIntermediateNunitResultsPath(), "")
-        nunitIntermediateFilesPath.mkdirs()
 
         GParsPool.withPool {
             getParallelTargetExecArgs().eachParallel {
@@ -146,7 +143,7 @@ class OpenCover extends ConventionTask {
         execute(getMergeCommand(intermediateReportsPath))
 
         new File(reportsFolder, "Summary.xml").renameTo(new File(reportsFolder, "coverage.xml"))
-        new File(intermediateReportsPath, "").deleteDir()
+        intermediateReportsPath.deleteDir()
     }
 
     def getRandomFileName() {
