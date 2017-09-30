@@ -16,6 +16,7 @@ class OpenCover extends ConventionTask {
     def targetExecArgs
     def parallelForks
     def parallelTargetExecArgs
+    def intermediateNunitResultsPath
     def registerMode
     List targetAssemblies
     def excludeByFile
@@ -90,7 +91,6 @@ class OpenCover extends ConventionTask {
     def runOpenCover() {
         def commandLineArgs = getCommonOpenCoverArgs()
 
-
         if (!getParallelForks() || getParallelTargetExecArgs().size() == 0) {
             runSingleOpenCover(commandLineArgs)
         }
@@ -127,6 +127,9 @@ class OpenCover extends ConventionTask {
     def runMultipleOpenCovers(ArrayList commandLineArgs) {
         def intermediateReportsPath = new File(reportsFolder, "intermediate-results-" + name)
         intermediateReportsPath.mkdirs()
+
+        def nunitIntermediateFilesPath = new File(getIntermediateNunitResultsPath(), "")
+        nunitIntermediateFilesPath.mkdirs()
 
         GParsPool.withPool {
             getParallelTargetExecArgs().eachParallel {
