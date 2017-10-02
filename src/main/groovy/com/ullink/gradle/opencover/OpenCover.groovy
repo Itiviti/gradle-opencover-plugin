@@ -4,18 +4,25 @@ import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.internal.ConventionTask
+import groovyx.gpars.GParsPool
 import org.gradle.api.tasks.TaskAction
+
+import java.nio.file.Paths
 
 class OpenCover extends ConventionTask {
     def openCoverHome
     def openCoverVersion
     def targetExec
     def targetExecArgs
+    def parallelForks
+    def parallelTargetExecArgs
     def registerMode
     List targetAssemblies
     def excludeByFile
     def excludeByAttribute
     def hideSkipped
+    def reportGeneratorVersion
+    def assemblyFilters
 
     boolean returnTargetCode = true
     boolean ignoreFailures = false
@@ -49,6 +56,17 @@ class OpenCover extends ConventionTask {
         openCoverExec
     }
 
+    def getReportGeneratorConsole() {
+        assert getReportGeneratorHome(), "You must install ReportGenerator to merge intermediate results"
+        File reportGeneratorExec = new File(getReportGeneratorHome().toString(), "ReportGenerator.exe")
+        reportGeneratorExec
+    }
+
+    def getReportGeneratorHome() {
+        def reportGenerator = 'reportgenerator-' + reportGeneratorVersion
+        Paths.get(project.gradle.gradleUserHomeDir.toString(), 'caches', 'reportgenerator', reportGenerator)
+    }
+
     def getOutputFolder() {
         new File(project.buildDir, 'opencover')
     }
@@ -62,15 +80,25 @@ class OpenCover extends ConventionTask {
     }
 
     @TaskAction
+
     def build() {
         reportsFolder.mkdirs()
 
-        def commandLine = buildCommandLine()
-
-        execute(commandLine)
+        runOpenCover()
     }
 
-    def buildCommandLine() {
+    def runOpenCover() {
+        def commandLineArgs = getCommonOpenCoverArgs()
+
+        if (!getParallelForks() || getParallelTargetExecArgs().size() == 0) {
+            runSingleOpenCover(commandLineArgs)
+        }
+        else {
+            runMultipleOpenCovers(commandLineArgs)
+        }
+    }
+
+    def getCommonOpenCoverArgs() {
         def commandLineArgs = [openCoverConsole, '-mergebyhash']
         if (getRegisterMode()) commandLineArgs += '-register:' + getRegisterMode()
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
@@ -80,10 +108,46 @@ class OpenCover extends ConventionTask {
         if (skipAutoProps) commandLineArgs += '-skipautoprops'
         if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
 
-        commandLineArgs += ["-target:${getTargetExec()}", "\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\"", "-targetdir:${project.buildDir}"]
         def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
         commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
+
+        commandLineArgs += "-target:${getTargetExec()}"
+        commandLineArgs += "-targetdir:${project.buildDir}"
+
+        commandLineArgs
+    }
+
+    def runSingleOpenCover(ArrayList commandLineArgs) {
+        commandLineArgs += ["\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\""]
         commandLineArgs += "-output:${getCoverageReportPath()}"
+
+        execute(commandLineArgs)
+    }
+
+    def runMultipleOpenCovers(ArrayList commandLineArgs) {
+        def intermediateReportsPath = new File(reportsFolder, "intermediate-results-" + name)
+        intermediateReportsPath.mkdirs()
+
+        GParsPool.withPool {
+            getParallelTargetExecArgs().eachParallel {
+                def fileName = getRandomFileName()
+                logger.info("Filename generated for the ${it} input was ${fileName}")
+
+                commandLineArgs += ["\"-targetargs:${it.collect({escapeArg(it)}).join(' ')}\""]
+                commandLineArgs += "-output:${new File(intermediateReportsPath, fileName + ".xml")}"
+
+                execute(commandLineArgs)
+            }
+        }
+
+        execute(getMergeCommand(intermediateReportsPath))
+
+        new File(reportsFolder, "Summary.xml").renameTo(new File(reportsFolder, "coverage.xml"))
+        intermediateReportsPath.deleteDir()
+    }
+
+    def getRandomFileName() {
+        UUID.randomUUID().toString()
     }
 
     def escapeArg(arg) {
@@ -93,7 +157,7 @@ class OpenCover extends ConventionTask {
         if (!arg.contains(' ')) return arg
         if (arg.contains('"'))
             throw new IllegalArgumentException("Don't know how to deal with this argument: ${arg}")
-        return '\\"'+arg+'\\"';
+        return '\\"'+arg+'\\"'
     }
 
     def execute(commandLineArgs) {
@@ -105,5 +169,15 @@ class OpenCover extends ConventionTask {
         if (!ignoreFailures && mbr.exitValue < 0) {
             throw new GradleException("${openCoverConsole} execution failed (ret=${mbr.exitValue})");
         }
+    }
+
+    def getMergeCommand(File intermediateReportsPath) {
+        def mergeCommand = [getReportGeneratorConsole()]
+        mergeCommand += "\"-reports:${intermediateReportsPath}\\*.xml\""
+        mergeCommand += "\"-targetdir: ${reportsFolder}\""
+        mergeCommand += "-assemblyfilters:+${getAssemblyFilters()}"
+        mergeCommand += "-reporttypes:xmlSummary"
+
+        mergeCommand
     }
 }

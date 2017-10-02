@@ -23,6 +23,12 @@ class OpenCoverPlugin implements Plugin<Project> {
             def version = task.getOpenCoverVersion()
             downloadOpenCover(project, version)
         }
+
+        task.conventionMapping.map 'reportGeneratorVersion', {'2.5.11.0'}
+        if (task.parallelForks) {
+            downloadReportGenerator(project, task.getReportGeneratorVersion())
+        }
+
         if (project.plugins.hasPlugin('msbuild')) {
             task.dependsOn project.tasks.msbuild
             task.conventionMapping.map "targetAssemblies", {
@@ -37,6 +43,7 @@ class OpenCoverPlugin implements Plugin<Project> {
 
     File downloadOpenCover(Project project, String version) {
         def dest = new File(new File(project.gradle.gradleUserHomeDir, 'caches'), 'opencover')
+
         if (!dest.exists()) {
             dest.mkdirs()
         }
@@ -44,7 +51,7 @@ class OpenCoverPlugin implements Plugin<Project> {
         if (!ret.exists()) {
             project.logger.info "Downloading & Unpacking OpenCover ${version}"
             def tmpFile = File.createTempFile("opencover.zip", null)
-            new URL(getUrlForVersion(version)).withInputStream { i ->
+            new URL(getOpenCoverUrl(version)).withInputStream { i ->
                 tmpFile.withOutputStream {
                     it << i
                 }
@@ -54,10 +61,38 @@ class OpenCoverPlugin implements Plugin<Project> {
         ret
     }
 
-    def getUrlForVersion(def version) {
+    File downloadReportGenerator(Project project, String version){
+        def dest = new File(new File(project.gradle.gradleUserHomeDir, 'caches'), 'reportgenerator')
+
+        if (!dest.exists()) {
+            dest.mkdirs()
+        }
+
+        def ret = new File(dest, "reportgenerator-${version}")
+        if (!ret.exists()) {
+            project.logger.info "Downloading & Unpacking Report Generator - version ${version}"
+
+            def tmpFile = File.createTempFile("reportgenerator.zip", null)
+
+            new URL(getReportGeneratorUrl(version)).withInputStream { i ->
+                tmpFile.withOutputStream {
+                    it << i
+                }
+            }
+            project.ant.unzip(src: tmpFile, dest: ret)
+        }
+        ret
+    }
+
+    def getOpenCoverUrl(def version) {
         if (version <= '4.5.3207') {
             return "https://bitbucket.org/shaunwilde/opencover/downloads/opencover.${version}.zip"
         }
         return "https://github.com/OpenCover/opencover/releases/download/${version}/opencover.${version}.zip"
+    }
+
+    def getReportGeneratorUrl(def version)
+    {
+        return "https://github.com/danielpalme/ReportGenerator/releases/download/v${version}/ReportGenerator_${version}.zip"
     }
 }
