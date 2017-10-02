@@ -1,8 +1,10 @@
 package com.ullink.gradle.opencover
 
+import com.ullink.gradle.nunit.NUnitTestResultsMerger
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import com.ullink.gradle.*
 
 class OpenCoverNUnitPlugin implements Plugin<Project> {
     void apply(Project project) {
@@ -27,6 +29,15 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
         task.conventionMapping.map 'parallelTargetExecArgs', {
             intermediateNunitResultsPath.mkdirs()
             nunit.getTestInputAsList(nunit.where?.value).collect({nunit.buildCommandArgs(it,  new File (intermediateNunitResultsPath,  UUID.randomUUID().toString() + ".xml"))})
+
+        }
+
+        task.doLast {
+            def listOfIntermediateFiles = intermediateNunitResultsPath.listFiles().toList()
+            if (!listOfIntermediateFiles?.empty){
+                new NUnitTestResultsMerger().merge(listOfIntermediateFiles, nunit.testReportPath)
+                intermediateNunitResultsPath.deleteDir()
+            }
         }
 
         project.afterEvaluate {
