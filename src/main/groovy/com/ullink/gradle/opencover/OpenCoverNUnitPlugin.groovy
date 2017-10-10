@@ -4,7 +4,6 @@ import com.ullink.gradle.nunit.NUnitTestResultsMerger
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import com.ullink.gradle.*
 
 class OpenCoverNUnitPlugin implements Plugin<Project> {
     void apply(Project project) {
