@@ -32,8 +32,9 @@ class OpenCover extends ConventionTask {
         inputs.files {
             getTargetAssemblies()
         }
-        outputs.files {
-           getReportsFolder().listFiles()
+
+        outputs.dir {
+           getReportsFolder()
         }
     }
 
