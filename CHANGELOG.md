@@ -1,5 +1,10 @@
 # gradle-opencover-plugin changelog
 
+## 1.8
+
+### Removed
+* The reports generated for parallel OpenCover launches are no longer merged
+
 ## 1.7
 
 ### Updated
