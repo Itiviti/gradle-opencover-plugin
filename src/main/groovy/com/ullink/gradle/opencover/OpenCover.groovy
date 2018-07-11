@@ -6,6 +6,7 @@ import org.gradle.api.Task
 import org.gradle.api.internal.ConventionTask
 import groovyx.gpars.GParsPool
 import org.gradle.api.tasks.TaskAction
+import java.util.concurrent.atomic.AtomicLong
 
 class OpenCover extends ConventionTask {
     def openCoverHome
@@ -26,6 +27,8 @@ class OpenCover extends ConventionTask {
     boolean mergeOutput = false
     boolean skipAutoProps = false
 
+    def fileNameId = new AtomicLong(1)
+
     OpenCover() {
         conventionMapping.map 'registerMode', { 'user' }
 
@@ -34,7 +37,7 @@ class OpenCover extends ConventionTask {
         }
 
         outputs.dir {
-           getReportsFolder()
+            getReportsFolder()
         }
     }
 
@@ -80,8 +83,7 @@ class OpenCover extends ConventionTask {
         if (!getParallelForks() || getParallelTargetExecArgs().size() == 0) {
             coverageReportPath = new File(reportsFolder, "coverage.xml")
             runSingleOpenCover(commandLineArgs)
-        }
-        else {
+        } else {
             coverageReportPath = reportsFolder.path.toString() + File.separator + "*.xml"
             runMultipleOpenCovers(commandLineArgs)
         }
@@ -107,38 +109,34 @@ class OpenCover extends ConventionTask {
     }
 
     def runSingleOpenCover(ArrayList commandLineArgs) {
-        commandLineArgs += ["\"-targetargs:${getTargetExecArgs().collect({escapeArg(it)}).join(' ')}\""]
+        commandLineArgs += ["\"-targetargs:${getTargetExecArgs().collect({ escapeArg(it) }).join(' ')}\""]
         commandLineArgs += "-output:${getCoverageReportPath()}"
 
         execute(commandLineArgs)
     }
 
     def runMultipleOpenCovers(ArrayList commandLineArgs) {
+        def targetExecArgs = getParallelTargetExecArgs()
+        logger.info "Preparing to run ${targetExecArgs.size()} tests..."
         GParsPool.withPool {
-            getParallelTargetExecArgs().eachParallel {
-                def fileName = getRandomFileName()
+            targetExecArgs.eachParallel {
+                def fileName = "${fileNameId.getAndIncrement()}"
                 logger.info("Filename generated for the ${it} input was ${fileName}")
-
-                commandLineArgs += ["\"-targetargs:${it.collect({escapeArg(it)}).join(' ')}\""]
-                commandLineArgs += "-output:${new File(reportsFolder, fileName + ".xml")}"
-
-                execute(commandLineArgs)
+                def currentTestArgs = ["\"-targetargs:${it.collect({ escapeArg(it) }).join(' ')}\""]
+                currentTestArgs += "-output:${new File(reportsFolder, fileName + ".xml")}"
+                execute(commandLineArgs + currentTestArgs)
             }
         }
-    }
-
-    def getRandomFileName() {
-        UUID.randomUUID().toString()
     }
 
     def escapeArg(arg) {
         arg = arg.toString()
         if (arg.startsWith('"') && arg.endsWith('"'))
-            arg = arg.substring(1, arg.length()-1)
+            arg = arg.substring(1, arg.length() - 1)
         if (!arg.contains(' ')) return arg
         if (arg.contains('"'))
             throw new IllegalArgumentException("Don't know how to deal with this argument: ${arg}")
-        return '\\"'+arg+'\\"'
+        return '\\"' + arg + '\\"'
     }
 
     def execute(commandLineArgs) {
