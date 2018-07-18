@@ -27,7 +27,7 @@ class OpenCover extends ConventionTask {
     boolean mergeOutput = false
     boolean skipAutoProps = false
 
-    def fileNameId = new AtomicLong(1)
+    static def fileNameId = new AtomicLong(1)
 
     OpenCover() {
         conventionMapping.map 'registerMode', { 'user' }
