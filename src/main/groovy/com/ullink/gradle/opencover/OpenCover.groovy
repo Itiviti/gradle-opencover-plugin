@@ -21,6 +21,7 @@ class OpenCover extends ConventionTask {
     def excludeByAttribute
     def hideSkipped
     def coverageReportPath
+    def threshold
 
     boolean returnTargetCode = true
     boolean ignoreFailures = false
@@ -98,6 +99,7 @@ class OpenCover extends ConventionTask {
         if (excludeByAttribute) commandLineArgs += '-excludebyattribute:' + excludeByAttribute
         if (skipAutoProps) commandLineArgs += '-skipautoprops'
         if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
+        if (threshold) commandLineArgs += '-threshold:' + threshold
 
         def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
         commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
