@@ -1,5 +1,9 @@
 # gradle-opencover-plugin changelog
 
+## 1.11
+### Added
+* Add threshold parameter for OpenCover. [usage] (https://github.com/OpenCover/opencover/wiki/Usage).
+
 ## 1.8
 
 ### Removed
