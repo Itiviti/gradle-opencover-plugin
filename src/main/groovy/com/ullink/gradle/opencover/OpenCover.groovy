@@ -1,22 +1,29 @@
 package com.ullink.gradle.opencover
 
+import groovyx.gpars.GParsPool
 import org.apache.commons.io.FilenameUtils
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Task
-import org.gradle.api.internal.ConventionTask
-import groovyx.gpars.GParsPool
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+
 import java.util.concurrent.atomic.AtomicLong
 
-class OpenCover extends ConventionTask {
-    def openCoverHome
-    def openCoverVersion
-    def targetExec
-    def targetExecArgs
-    def parallelForks
-    def parallelTargetExecArgs
-    def registerMode
-    List targetAssemblies
+class OpenCover extends DefaultTask {
+    Property<String> openCoverHome
+    Property<String> openCoverVersion
+    Property<File> targetExec
+    ListProperty<String> targetExecArgs
+    Property<Boolean> parallelForks
+    ListProperty<String> parallelTargetExecArgs
+    Property<String> registerMode
+    @InputFiles
+    ConfigurableFileCollection targetAssemblies
     def excludeByFile
     def excludeByAttribute
     def hideSkipped
@@ -31,15 +38,15 @@ class OpenCover extends ConventionTask {
     static def fileNameId = new AtomicLong(1)
 
     OpenCover() {
-        conventionMapping.map 'registerMode', { 'user' }
+        openCoverHome = project.getObjects().property(String)
+        openCoverVersion = project.getObjects().property(String)
+        registerMode = project.getObjects().property(String)
+        targetExec = project.getObjects().property(File)
+        targetExecArgs = project.getObjects().listProperty(String)
+        parallelForks = project.getObjects().property(Boolean)
+        parallelTargetExecArgs = project.getObjects().listProperty(String)
 
-        inputs.files {
-            getTargetAssemblies()
-        }
-
-        outputs.dir {
-            getReportsFolder()
-        }
+        registerMode.set('user')
     }
 
     def inputsOutputsFrom(Task task) {
@@ -62,16 +69,12 @@ class OpenCover extends ConventionTask {
         new File(project.buildDir, 'opencover')
     }
 
+    @OutputDirectory
     def getReportsFolder() {
         new File(outputFolder, 'reports')
     }
 
-    def getCoverageReportPath() {
-        coverageReportPath
-    }
-
     @TaskAction
-
     def build() {
         reportsFolder.mkdirs()
 
@@ -81,7 +84,7 @@ class OpenCover extends ConventionTask {
     def runOpenCover() {
         def commandLineArgs = getCommonOpenCoverArgs()
 
-        if (!getParallelForks() || getParallelTargetExecArgs().size() == 0) {
+        if (!parallelForks.get() || parallelTargetExecArgs.empty()) {
             coverageReportPath = new File(reportsFolder, "coverage.xml")
             runSingleOpenCover(commandLineArgs)
         } else {
@@ -92,7 +95,7 @@ class OpenCover extends ConventionTask {
 
     def getCommonOpenCoverArgs() {
         def commandLineArgs = [openCoverConsole, '-mergebyhash']
-        if (getRegisterMode()) commandLineArgs += '-register:' + getRegisterMode()
+        if (registerMode.get()) commandLineArgs += '-register:' + registerMode.get()
         if (returnTargetCode) commandLineArgs += '-returntargetcode'
         if (mergeOutput) commandLineArgs += '-mergeoutput'
         if (excludeByFile) commandLineArgs += '-excludebyfile:' + excludeByFile
@@ -101,27 +104,27 @@ class OpenCover extends ConventionTask {
         if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
         if (threshold) commandLineArgs += '-threshold:' + threshold
 
-        def filters = getTargetAssemblies().collect { "+[${FilenameUtils.getBaseName(project.file(it).name)}]*" }
+        def filters = targetAssemblies.collect { "+[${FilenameUtils.getBaseName(it.name)}]*" }
         commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
 
-        commandLineArgs += "-target:${getTargetExec()}"
+        commandLineArgs += "-target:${targetExec.get()}"
         commandLineArgs += "-targetdir:${project.buildDir}"
 
         commandLineArgs
     }
 
     def runSingleOpenCover(ArrayList commandLineArgs) {
-        commandLineArgs += ["\"-targetargs:${getTargetExecArgs().collect({ escapeArg(it) }).join(' ')}\""]
-        commandLineArgs += "-output:${getCoverageReportPath()}"
+        commandLineArgs += ["\"-targetargs:${targetExecArgs.get().collect({ escapeArg(it) }).join(' ')}\""]
+        commandLineArgs += "-output:${coverageReportPath}"
 
         execute(commandLineArgs)
     }
 
     def runMultipleOpenCovers(ArrayList commandLineArgs) {
-        def targetExecArgs = getParallelTargetExecArgs()
-        logger.info "Preparing to run ${targetExecArgs.size()} tests..."
+        def execArgs = parallelTargetExecArgs.get()
+        logger.info "Preparing to run ${execArgs.size()} tests..."
         GParsPool.withPool {
-            targetExecArgs.eachParallel {
+            execArgs.eachParallel {
                 def fileName = "${fileNameId.getAndIncrement()}"
                 logger.info("Filename generated for the ${it} input was ${fileName}")
                 def currentTestArgs = ["\"-targetargs:${it.collect({ escapeArg(it) }).join(' ')}\""]
@@ -148,7 +151,7 @@ class OpenCover extends ConventionTask {
         }
 
         if (!ignoreFailures && mbr.exitValue < 0) {
-            throw new GradleException("${openCoverConsole} execution failed (ret=${mbr.exitValue})");
+            throw new GradleException("${openCoverConsole} execution failed (ret=${mbr.exitValue})")
         }
     }
 }

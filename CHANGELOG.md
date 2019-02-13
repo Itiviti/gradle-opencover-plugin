@@ -3,6 +3,10 @@
 ## 1.11
 ### Added
 * Add threshold parameter for OpenCover. [usage] (https://github.com/OpenCover/opencover/wiki/Usage).
+* Support Gradle 5
+
+### Updated
+* Migrate from ConventionTask to DefaultTask
 
 ## 1.8
 

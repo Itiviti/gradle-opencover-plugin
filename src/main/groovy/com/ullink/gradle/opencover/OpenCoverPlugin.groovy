@@ -7,36 +7,37 @@ import org.gradle.api.Task
 class OpenCoverPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.tasks.withType(OpenCover).whenTaskAdded { OpenCover task ->
-            applyOpencoverConventions(task, project)
+            applyDefaults(task, project)
         }
 
-        Task opencoverTask = project.task('opencover', type: OpenCover)
-        opencoverTask.description = 'Executes tests measuring covering with Opencover'
+        Task task = project.task('opencover', type: OpenCover)
+        task.description = 'Executes tests measuring covering with Opencover'
     }
 
-    def applyOpencoverConventions(OpenCover task, Project project) {
-        task.conventionMapping.map "openCoverVersion", { '4.6.519' }
-        task.conventionMapping.map "openCoverHome", {
-            if (System.getenv()['OPENCOVER_HOME']) {
-                return System.getenv()['OPENCOVER_HOME']
+    def applyDefaults(OpenCover task, Project project) {
+        task.openCoverVersion.set(project.provider { '4.6.519' })
+        task.openCoverHome.set(project.provider {
+            def home = System.getenv()['OPENCOVER_HOME']
+            if (home) {
+                return home
             }
-            def version = task.getOpenCoverVersion()
+            def version = task.openCoverVersion.get()
             downloadOpenCover(project, version)
-        }
+        })
 
-        if (project.plugins.hasPlugin('msbuild')) {
-            task.dependsOn project.tasks.msbuild
-            task.conventionMapping.map "targetAssemblies", {
-                project.tasks.msbuild.projects.findAll {
+        project.plugins.withId('com.ullink.msbuild') {
+            def msbuildTask = project.tasks.msbuild
+            task.targetAssemblies = project.files (
+                msbuildTask.projects.findAll {
                     !(it.key =~ 'test') && it.value.properties.TargetPath
                 }.collect {
-                    it.value.getProjectPropertyPath('TargetPath')
+                    it.value.getProjectPropertyPath('TargetPath').toString()
                 }
-            }
+            )
         }
     }
 
-    File downloadOpenCover(Project project, String version) {
+    String downloadOpenCover(Project project, String version) {
         def dest = new File(new File(project.gradle.gradleUserHomeDir, 'caches'), 'opencover')
 
         if (!dest.exists()) {
@@ -53,7 +54,7 @@ class OpenCoverPlugin implements Plugin<Project> {
             }
             project.ant.unzip(src: tmpFile, dest: ret)
         }
-        ret
+        ret.path
     }
 
     def getOpenCoverUrl(def version) {
