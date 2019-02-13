@@ -3,7 +3,7 @@ gradle-opencover-plugin [![Build status](https://ci.appveyor.com/api/projects/st
 
 A gradle plugin for getting test coverage using OpenCover
 
-#opencover plugin
+# opencover plugin
 
 A base plugin 'com.ullink.opencover' is provided. It will sets up a task named 'opencover' that when called will execute
 the OpenCover.exe file of the associated OpenCover version. That task may be configured:
