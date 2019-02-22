@@ -1,18 +1,9 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            url "https://dl.bintray.com/ullink/gradle-plugins"
-        }
-    }
-    dependencies {
-        classpath "nu.studer:gradle-plugindev-plugin:1.0.4.MULTI"
-        classpath 'net.researchgate:gradle-release:2.4.0'
-    }
+plugins {
+    id 'nu.studer.plugindev' version '1.0.12'
+    id 'net.researchgate.release' version '2.8.0'
 }
+
 apply plugin: 'groovy'
-apply plugin: 'nu.studer.plugindev'
-apply plugin: 'net.researchgate.release'
 
 dependencies {
     compile 'commons-io:commons-io:1.3.2'
@@ -23,9 +14,7 @@ dependencies {
 group = 'com.ullink.gradle'
 description 'gradle-opencover-plugin is a Gradle plugin for getting code coverage using OpenCover'
 
-
 bintray {
-    // to remove when upgraded plugindev to 1.0.4
     user project.properties.bintrayUser
     key project.properties.bintrayApiKey
     pkg.repo = 'gradle-plugins'
@@ -43,17 +32,10 @@ plugindev {
     authorEmail 'muryoh@gmail.com'
     projectUrl "https://github.com/Ullink/${project.name}"
     projectInceptionYear '2015'
-
-    pluginImplementation {
-        pluginId 'com.ullink.opencover'
-        pluginImplementationClass 'com.ullink.gradle.opencover.OpenCoverPlugin'
-    }
-    pluginImplementation {
-        pluginId = 'com.ullink.opencover-nunit'
-        pluginImplementationClass 'com.ullink.gradle.opencover.OpenCoverNUnitPlugin'
-    }
+    pluginId = 'com.ullink.opencover-nunit'
+    pluginImplementationClass 'com.ullink.gradle.opencover.OpenCoverNUnitPlugin'
 
     done()
 }
 
-project.tasks.afterReleaseBuild.dependsOn project.tasks.bintrayUpload
+afterReleaseBuild.dependsOn project.tasks.bintrayUpload
