@@ -84,7 +84,7 @@ class OpenCover extends DefaultTask {
     def runOpenCover() {
         def commandLineArgs = getCommonOpenCoverArgs()
 
-        if (!parallelForks.get() || parallelTargetExecArgs.empty()) {
+        if (!parallelForks.get() || parallelTargetExecArgs.get().empty()) {
             coverageReportPath = new File(reportsFolder, "coverage.xml")
             runSingleOpenCover(commandLineArgs)
         } else {
