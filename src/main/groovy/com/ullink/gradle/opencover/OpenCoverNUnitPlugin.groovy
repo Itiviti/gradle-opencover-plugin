@@ -30,7 +30,7 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
         })
 
         task.doLast {
-            if (task.parallelForks.get() && !task.parallelTargetExecArgs.empty()) {
+            if (task.parallelForks.get() && !task.parallelTargetExecArgs.get().isEmpty()) {
                 def listOfIntermediateFiles = intermediateNunitResultsPath.listFiles()?.toList()
                 if (listOfIntermediateFiles){
                     new NUnitTestResultsMerger().merge(listOfIntermediateFiles, nunit.testReportPath)
