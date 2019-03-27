@@ -27,13 +27,13 @@ class OpenCoverPlugin implements Plugin<Project> {
 
         project.plugins.withId('com.ullink.msbuild') {
             def msbuildTask = project.tasks.msbuild
-            task.targetAssemblies = project.files (
+            task.targetAssemblies.set(project.provider {
                 msbuildTask.projects.findAll {
                     !(it.key =~ 'test') && it.value.properties.TargetPath
                 }.collect {
-                    it.value.getProjectPropertyPath('TargetPath').toString()
+                    project.file(it.value.getProjectPropertyPath('TargetPath').toString())
                 }
-            )
+            })
         }
     }
 

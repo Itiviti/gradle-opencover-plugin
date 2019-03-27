@@ -1,5 +1,12 @@
 # gradle-opencover-plugin changelog
 
+## 1.13
+### Fixed
+* Do not evaluate targetAssemblies when applying the plugin
+
+### Changed
+* Remove gpars and use parallelStream instead
+
 ## 1.11
 ### Added
 * Add threshold parameter for OpenCover. [usage] (https://github.com/OpenCover/opencover/wiki/Usage).

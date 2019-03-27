@@ -6,8 +6,7 @@ plugins {
 apply plugin: 'groovy'
 
 dependencies {
-    compile 'commons-io:commons-io:1.3.2'
-    compile 'org.codehaus.gpars:gpars:1.2.1'
+    compile 'commons-io:commons-io:2.6'
     compile 'com.ullink.gradle:gradle-nunit-plugin:1.12'
 }
 

@@ -1,11 +1,9 @@
 package com.ullink.gradle.opencover
 
-import groovyx.gpars.GParsPool
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Task
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFiles
@@ -22,8 +20,9 @@ class OpenCover extends DefaultTask {
     Property<Boolean> parallelForks
     ListProperty<String> parallelTargetExecArgs
     Property<String> registerMode
+
     @InputFiles
-    ConfigurableFileCollection targetAssemblies
+    ListProperty<File> targetAssemblies
     def excludeByFile
     def excludeByAttribute
     def hideSkipped
@@ -45,6 +44,7 @@ class OpenCover extends DefaultTask {
         targetExecArgs = project.getObjects().listProperty(String)
         parallelForks = project.getObjects().property(Boolean)
         parallelTargetExecArgs = project.getObjects().listProperty(String)
+        targetAssemblies = project.getObjects().listProperty(File)
 
         registerMode.set('user')
     }
@@ -104,7 +104,7 @@ class OpenCover extends DefaultTask {
         if (hideSkipped) commandLineArgs += '-hideskipped:' + hideSkipped
         if (threshold) commandLineArgs += '-threshold:' + threshold
 
-        def filters = targetAssemblies.collect { "+[${FilenameUtils.getBaseName(it.name)}]*" }
+        def filters = targetAssemblies.get().collect { "+[${FilenameUtils.getBaseName(it.name)}]*" }
         commandLineArgs += '-filter:\\"' + filters.join(' ') + '\\"'
 
         commandLineArgs += "-target:${targetExec.get()}"
@@ -123,15 +123,15 @@ class OpenCover extends DefaultTask {
     def runMultipleOpenCovers(ArrayList commandLineArgs) {
         def execArgs = parallelTargetExecArgs.get()
         logger.info "Preparing to run ${execArgs.size()} tests..."
-        GParsPool.withPool {
-            execArgs.eachParallel {
+
+        execArgs.parallelStream()
+            .forEach {
                 def fileName = "${fileNameId.getAndIncrement()}"
                 logger.info("Filename generated for the ${it} input was ${fileName}")
                 def currentTestArgs = ["\"-targetargs:${it.collect({ escapeArg(it) }).join(' ')}\""]
                 currentTestArgs += "-output:${new File(reportsFolder, fileName + ".xml")}"
                 execute(commandLineArgs + currentTestArgs)
             }
-        }
     }
 
     def escapeArg(arg) {
