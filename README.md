@@ -1,4 +1,4 @@
-gradle-opencover-plugin [![Build status](https://ci.appveyor.com/api/projects/status/chcaikhiapb4mmn2?svg=true)](https://ci.appveyor.com/project/gluck/gradle-opencover-plugin) [![Build Status](https://travis-ci.org/Ullink/gradle-opencover-plugin.svg?branch=master)](https://travis-ci.org/Ullink/gradle-opencover-plugin) [![GitHub license](https://img.shields.io/github/license/Ullink/gradle-opencover-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+gradle-opencover-plugin [![Build status](https://ci.appveyor.com/api/projects/status/chcaikhiapb4mmn2?svg=true)](https://ci.appveyor.com/project/gluck/gradle-opencover-plugin) [![Build Status](https://travis-ci.org/Itiviti/gradle-opencover-plugin.svg?branch=master)](https://travis-ci.org/Itiviti/gradle-opencover-plugin) [![GitHub license](https://img.shields.io/github/license/Itiviti/gradle-opencover-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 =======================
 
 A gradle plugin for getting test coverage using OpenCover
