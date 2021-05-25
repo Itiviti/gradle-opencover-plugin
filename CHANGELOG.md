@@ -3,6 +3,7 @@
 ## 1.14
 ### Changed
 * Default OpenCover version is now 4.7.1189
+* The plugin is now published on plugins.gradle.org
 
 ## 1.13
 ### Fixed

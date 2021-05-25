@@ -1,9 +1,11 @@
 plugins {
-    id 'nu.studer.plugindev' version '1.0.12'
     id 'net.researchgate.release' version '2.8.0'
+    id 'com.gradle.plugin-publish' version '0.15.0'
+    id 'java-gradle-plugin'
 }
 
 apply plugin: 'groovy'
+apply plugin: 'com.gradle.plugin-publish'
 
 dependencies {
     compile 'commons-io:commons-io:2.6'
@@ -13,28 +15,25 @@ dependencies {
 group = 'com.ullink.gradle'
 description 'gradle-opencover-plugin is a Gradle plugin for getting code coverage using OpenCover'
 
-bintray {
-    user project.properties.bintrayUser
-    key project.properties.bintrayApiKey
-    pkg.repo = 'gradle-plugins'
-    pkg.version.gpg.sign = true
-    pkg.userOrg = 'ullink'
+pluginBundle {
+    website = 'https://github.com/Itiviti/gradle-opencover-plugin'
+    vcsUrl = 'https://github.com/Itiviti/gradle-opencover-plugin'
+    tags = ['opencover', 'nunit', 'c#', '.net']
+
+    mavenCoordinates {
+        groupId = 'com.ullink.gradle'
+    }
 }
 
-plugindev {
-    pluginName 'com.ullink.gradle:gradle-opencover-plugin'
-    pluginDescription project.description
-    pluginLicenses 'Apache-2.0'
-    pluginTags 'gradle', 'plugin', 'opencover', 'c#', '.net', 'test'
-    authorId 'muryoh'
-    authorName 'Remy Masson'
-    authorEmail 'muryoh@gmail.com'
-    projectUrl "https://github.com/Ullink/${project.name}"
-    projectInceptionYear '2015'
-    pluginId = 'com.ullink.opencover-nunit'
-    pluginImplementationClass 'com.ullink.gradle.opencover.OpenCoverNUnitPlugin'
-
-    done()
+gradlePlugin {
+    plugins {
+        opencoverPlugin {
+            id = 'com.ullink.opencover-nunit'
+            description = project.description
+            displayName = 'Gradle Opencover Plugin'
+            implementationClass = 'com.ullink.gradle.opencover.OpenCoverNUnitPlugin'
+        }
+    }
 }
 
-afterReleaseBuild.dependsOn project.tasks.bintrayUpload
+afterReleaseBuild.dependsOn project.tasks.publishPlugins
