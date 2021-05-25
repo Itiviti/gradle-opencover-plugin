@@ -1,5 +1,9 @@
 # gradle-opencover-plugin changelog
 
+## 1.15
+### Fixed
+* The plugins.gradle.org jar now contains both opencover and opencover-nunit plugins
+
 ## 1.14
 ### Changed
 * Default OpenCover version is now 4.7.1189

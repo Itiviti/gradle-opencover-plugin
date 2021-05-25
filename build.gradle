@@ -27,11 +27,18 @@ pluginBundle {
 
 gradlePlugin {
     plugins {
-        opencoverPlugin {
+        opencoverNunitPlugin {
             id = 'com.ullink.opencover-nunit'
             description = project.description
-            displayName = 'Gradle Opencover Plugin'
+            displayName = 'Gradle Opencover NUnit Plugin'
             implementationClass = 'com.ullink.gradle.opencover.OpenCoverNUnitPlugin'
+        }
+
+        opencoverPlugin {
+            id = 'com.ullink.opencover'
+            description = project.description
+            displayName = 'Gradle Opencover Plugin'
+            implementationClass = 'com.ullink.gradle.opencover.OpenCoverPlugin'
         }
     }
 }
