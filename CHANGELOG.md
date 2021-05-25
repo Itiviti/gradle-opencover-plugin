@@ -1,5 +1,9 @@
 # gradle-opencover-plugin changelog
 
+## 1.14
+### Changed
+* Default OpenCover version is now 4.7.1189
+
 ## 1.13
 ### Fixed
 * Do not evaluate targetAssemblies when applying the plugin

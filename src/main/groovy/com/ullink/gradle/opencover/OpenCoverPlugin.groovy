@@ -5,6 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 
 class OpenCoverPlugin implements Plugin<Project> {
+    String DEFAULT_OPENCOVER_VERSION = '4.7.1189'
     void apply(Project project) {
         project.tasks.withType(OpenCover).whenTaskAdded { OpenCover task ->
             applyDefaults(task, project)
@@ -15,7 +16,7 @@ class OpenCoverPlugin implements Plugin<Project> {
     }
 
     def applyDefaults(OpenCover task, Project project) {
-        task.openCoverVersion.set(project.provider { '4.6.519' })
+        task.openCoverVersion.set(project.provider { DEFAULT_OPENCOVER_VERSION })
         task.openCoverHome.set(project.provider {
             def home = System.getenv()['OPENCOVER_HOME']
             if (home) {
