@@ -6,32 +6,61 @@ import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.plugins.ide.eclipse.model.Output
 
 import java.util.concurrent.atomic.AtomicLong
 
 class OpenCover extends DefaultTask {
-    Property<String> openCoverHome
-    Property<String> openCoverVersion
-    Property<File> targetExec
-    ListProperty<String> targetExecArgs
-    Property<Boolean> parallelForks
-    ListProperty<String> parallelTargetExecArgs
-    Property<String> registerMode
+    @Input
+    final Property<String> openCoverHome
+    @Input
+    final Property<String> openCoverVersion
+    @Optional
+    @Input
+    final Property<File> targetExec
+    @Optional
+    @Input
+    final ListProperty<String> targetExecArgs
+    @Optional
+    @Input
+    final Property<Boolean> parallelForks
+    @Optional
+    @Input
+    final ListProperty<String> parallelTargetExecArgs
+    @Optional
+    @Input
+    final Property<String> registerMode
 
     @InputFiles
     ListProperty<File> targetAssemblies
+    @Optional
+    @Input
     def excludeByFile
+    @Optional
+    @Input
     def excludeByAttribute
+    @Optional
+    @Input
     def hideSkipped
+    @Internal
     def coverageReportPath
+    @Optional
+    @Input
     def threshold
 
+    @Input
     boolean returnTargetCode = true
+    @Input
     boolean ignoreFailures = false
+    @Input
     boolean mergeOutput = false
+    @Input
     boolean skipAutoProps = false
 
     static def fileNameId = new AtomicLong(1)
@@ -58,6 +87,7 @@ class OpenCover extends DefaultTask {
         }
     }
 
+    @Internal
     def getOpenCoverConsole() {
         assert getOpenCoverHome(), "You must install OpenCover and set opencover.home property or OPENCOVER_HOME env variable"
         File openCoverExec = new File(project.file(getOpenCoverHome()), "OpenCover.Console.exe")
@@ -65,6 +95,7 @@ class OpenCover extends DefaultTask {
         openCoverExec
     }
 
+    @Internal
     def getOutputFolder() {
         new File(project.buildDir, 'opencover')
     }
@@ -93,6 +124,7 @@ class OpenCover extends DefaultTask {
         }
     }
 
+    @Internal
     def getCommonOpenCoverArgs() {
         def commandLineArgs = [openCoverConsole, '-mergebyhash']
         if (registerMode.get()) commandLineArgs += '-register:' + registerMode.get()

@@ -8,8 +8,8 @@ apply plugin: 'groovy'
 apply plugin: 'com.gradle.plugin-publish'
 
 dependencies {
-    compile 'commons-io:commons-io:2.6'
-    compile 'com.ullink.gradle:gradle-nunit-plugin:1.12'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'com.ullink.gradle:gradle-nunit-plugin:2.2'
 }
 
 group = 'com.ullink.gradle'
