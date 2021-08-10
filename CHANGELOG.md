@@ -1,8 +1,7 @@
 # gradle-opencover-plugin changelog
-## 1.16
+## 1.18
 ### Fixed
 * Gradle 7 compatibility
-
 
 ## 1.15
 ### Fixed
