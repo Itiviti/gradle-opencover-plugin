@@ -12,7 +12,6 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.plugins.ide.eclipse.model.Output
 
 import java.util.concurrent.atomic.AtomicLong
 
@@ -76,15 +75,6 @@ class OpenCover extends DefaultTask {
         targetAssemblies = project.getObjects().listProperty(File)
 
         registerMode.set('user')
-    }
-
-    def inputsOutputsFrom(Task task) {
-        inputs.files {
-            task.inputs.files
-        }
-        outputs.files {
-            task.outputs.files
-        }
     }
 
     @Internal

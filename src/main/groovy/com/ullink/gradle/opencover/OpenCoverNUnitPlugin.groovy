@@ -38,9 +38,5 @@ class OpenCoverNUnitPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        project.afterEvaluate {
-            task.inputsOutputsFrom(nunit)
-        }
     }
 }
