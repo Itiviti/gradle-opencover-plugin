@@ -1,5 +1,6 @@
 package com.ullink.gradle.opencover
 
+import com.ullink.gradle.nunit.NUnit
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -75,6 +76,16 @@ class OpenCover extends DefaultTask {
         targetAssemblies = project.getObjects().listProperty(File)
 
         registerMode.set('user')
+    }
+
+    def inputsOutputsFrom(NUnit task) {
+        inputs.files {
+            task.inputs.files
+        }
+        outputs.dirs {
+            task.outputFolder
+            task.reportFolder
+        }
     }
 
     @Internal
